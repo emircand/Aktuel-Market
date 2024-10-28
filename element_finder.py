@@ -1,53 +1,40 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
-import time
+import pandas as pd
+import re
 
-chrome_options = Options()
-chrome_options.add_argument('--ignore-certificate-errors')  # Ignore SSL certificate errors
-chrome_options.add_argument('--ignore-ssl-errors')  # Also ignore SSL errors
+# Function to extract specific sections from 'Açıklama' until the next keyword occurs
+def extract_sections(text, keywords):
+    sections = {keyword: None for keyword in keywords}
+    pattern = re.compile(r'(' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\s*(?:\:)?\s*(.*?)(?=' + '|'.join(r'\s*' + re.escape(keyword) + r'\s*(?:\:)?' for keyword in keywords) + r'|$)', re.DOTALL)
+    matches = pattern.findall(text)
+    for match in matches:
+        keyword, content = match
+        sections[keyword.strip()] = content.strip()
+    return sections
 
-# Initialize WebDriver with options and service
-service = Service(executable_path="chromedriver.exe")
-driver = webdriver.Chrome(service=service, options=chrome_options)
+# Example text
+text = """
+A101 Kapıda’da sunulan Kavun 5 kg ağırlığında bir adet kavun olarak sunulur. Dışı kabuklu meyve, sulu yapısı ve aromatik tadı ile severek tüketilir. 
+Genel Özellikler
+Yaz meyvesi: Yazın yetişen ve yaz meyvesi olarak bilinen gıda maddesi
+Çekirdekli Yapı: Orta kısmında yer alan ve kolay bir şekilde sıyrılan yapısı
+Yüksek Lif: Yüksek lif kaynağı yapısı ile uzun süreli tokluk hissi etkisi
+Uyarılar
+Potasyum, sodyum, kalsiyum, magnezyum, fosfat ile likopen ve beta-karoten gibi bitkisel besinler içerir.
+Saklama Koşulları
+0° ila 5° C’de muhafaza edilmelidir.
+Kullanım Tavsiyesi 
+Dilimleyerek ve kabuğundan ayırarak servis edebilirsiniz. Öğün arası olarak karpuz ve peynir ile birlikte tüketebilirsiniz. Aynı zamanda yaz aylarında dondurma da yapabilirsiniz.
+Gramaj stoktaki ürüne göre değişebilecek olup, teslim edilen ürün gramajına göre tahsilat yapılmaktadır.
 
-# URL of the A101 product page
-url = 'https://www.a101.com.tr/kapida/sut-urunleri-kahvaltilik/birsah-yagli-sut-1-l_p-12000001'
-driver.get(url)
-time.sleep(2)  # Wait for page to load
-
-# JavaScript to capture click events and log detailed element information
-script = """
-document.addEventListener('click', function(event) {
-    var element = event.target;
-    var elementInfo = {
-        tagName: element.tagName,
-        className: element.className,
-        id: element.id,
-        textContent: element.textContent.trim()
-    };
-    window.elementInfo = elementInfo;
-});
+Teslimat adresinize göre ürünün stok durumu değişebilir. Teslimat adresinizi ekledikten sonra ürün stok durumunu görüntüleyebilirsiniz.
 """
 
-# Execute the script in the browser
-driver.execute_script(script)
+# Keywords to extract
+keywords = ["Genel Özellikler", "Uyarılar", "Saklama Koşulları", "Kullanım Tavsiyesi"]
 
-# Open a file to log element information
-with open('clicked_elements_info.txt', 'w', encoding='utf-8') as file:
-    try:
-        while True:
-            # Get the element information from the browser
-            element_info = driver.execute_script("return window.elementInfo;")
-            if element_info:
-                # Format the element information as a string
-                element_info_str = f"Tag: {element_info['tagName']}, Class: {element_info['className']}, ID: {element_info['id']}, Text: {element_info['textContent']}\n"
-                file.write(element_info_str)
-                file.flush()  # Ensure the data is written to the file
-                driver.execute_script("window.elementInfo = null;")  # Reset the element information
-            time.sleep(1)  # Adjust the sleep time as needed
-    except KeyboardInterrupt:
-        print("Stopping the program...")
+# Extract sections
+sections = extract_sections(text, keywords)
 
-driver.quit()  # Close the browser
+# Print extracted sections
+for keyword, content in sections.items():
+    print(f"{keyword}: {content}")
