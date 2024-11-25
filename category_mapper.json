@@ -1,0 +1,88 @@
+{
+    "categories": {
+        "icecek": {
+            "a101": "https://www.a101.com.tr/kapida/icecek",
+            "migros": "https://www.migros.com.tr/sanalmarket/icecek-c-6",
+            "sok": "https://www.sokmarket.com.tr/icecek-c-20505"
+        },
+        "meyve sebze": {
+            "a101": "https://www.a101.com.tr/kapida/meyve-sebze",
+            "migros": "https://www.migros.com.tr/sanalmarket/meyve-sebze-c-2",
+            "sok": "https://www.sokmarket.com.tr/meyve-ve-sebze-c-20"
+        },
+        "et urunleri": {
+            "a101": "https://www.a101.com.tr/kapida/et-balik-tavuk",
+            "migros": "https://www.migros.com.tr/sanalmarket/et-tavuk-balik-c-3",
+            "sok": "https://www.sokmarket.com.tr/et-ve-tavuk-ve-sarkuteri-c-160"
+        },
+        "sut urunleri kahvaltilik": {
+            "a101": "https://www.a101.com.tr/kapida/sut-urunleri-kahvaltilik",
+            "migros": "https://www.migros.com.tr/sanalmarket/sut-kahvaltilik-c-4",
+            "sok": "https://www.sokmarket.com.tr/sut-ve-sut-urunleri-c-460"
+        },
+        "fırın": {
+            "a101": "https://www.a101.com.tr/kapida/firindan",
+            "migros": "https://www.migros.com.tr/sanalmarket/firin-pastane-c-7e",
+            "sok": "https://www.sokmarket.com.tr/ekmek-ve-pastane-c-1250"
+        },
+        "temel gıda": {
+            "a101": "https://www.a101.com.tr/kapida/temel-gida",
+            "migros": "https://www.migros.com.tr/sanalmarket/temel-gida-c-5",
+            "sok": "https://www.sokmarket.com.tr/yemeklik-malzemeler-c-1770"
+        },
+        "atıştırmalık": {
+            "a101": "https://www.a101.com.tr/kapida/atistirmalik",
+            "migros": "https://www.migros.com.tr/sanalmarket/atistirmalik-c-113fb",
+            "sok": "https://www.sokmarket.com.tr/atistirmaliklar-c-20376"
+        },
+        "donuk ürünler": {
+            "a101": "https://www.a101.com.tr/kapida/donuk-hazir-yemek-meze",
+            "migros": "https://www.migros.com.tr/sanalmarket/meze-hazir-yemek-donuk-c-7d",
+            "sok": "https://www.sokmarket.com.tr/dondurulmus-urunler-c-1550"
+        },
+        "dondurma": {
+            "a101": "https://www.a101.com.tr/kapida/dondurma",
+            "migros": "https://www.migros.com.tr/sanalmarket/dondurma-c-41b",
+            "sok": "https://www.sokmarket.com.tr/dondurma-c-31102"
+        },
+        "temizlik ürünleri": {
+            "a101": "https://www.a101.com.tr/kapida/temizlik-urunleri",
+            "migros": "https://www.migros.com.tr/sanalmarket/deterjan-temizlik-c-7",
+            "sok": "https://www.sokmarket.com.tr/temizlik-c-20647"
+        },
+        "kişisel bakım": {
+            "a101": "https://www.a101.com.tr/kapida/kisisel-bakim",
+            "migros": "https://www.migros.com.tr/sanalmarket/kisisel-bakim-kozmetik-saglik-c-8",
+            "sok": "https://www.sokmarket.com.tr/kisisel-bakim-ve-kozmetik-c-20395"
+        },
+        "kağıt ürünleri": {
+            "a101": "https://www.a101.com.tr/kapida/kagit-urunleri",
+            "migros": "https://www.migros.com.tr/sanalmarket/kagit-islak-mendil-c-8d",
+            "sok": "https://www.sokmarket.com.tr/kagit-urunler-c-20875"
+        },
+        "elektronik": {
+            "a101": "https://www.a101.com.tr/kapida/elektronik",
+            "migros": "https://www.migros.com.tr/sanalmarket/elektronik-c-a6",
+            "sok": "https://www.sokmarket.com.tr/elektronik-c-22769"
+        },
+        "anne bebek": {
+            "a101": "https://www.a101.com.tr/kapida/anne-bebek",
+            "migros": "https://www.migros.com.tr/sanalmarket/bebek-c-9",
+            "sok": "https://www.sokmarket.com.tr/anne-bebek-ve-cocuk-c-20634"
+        },
+        "ev yaşam": {
+            "a101": "https://www.a101.com.tr/kapida/ev-yasam",
+            "migros": "https://www.migros.com.tr/sanalmarket/ev-yasam-c-a",
+            "sok": "https://www.sokmarket.com.tr/ev-ve-yasam-c-20898"
+        },
+        "kırtasiye": {
+            "a101": "https://www.a101.com.tr/kapida/kirtasiye",
+            "migros": "https://www.migros.com.tr/sanalmarket/kitap-kirtasiye-oyuncak-c-118ec"
+        },
+        "evcil hayvan": {
+            "a101": "https://www.a101.com.tr/kapida/evcil-hayvan",
+            "migros": "https://www.migros.com.tr/sanalmarket/pet-shop-c-a0",
+            "sok": "https://www.sokmarket.com.tr/evcil-dostlar-c-20880"
+        }
+    }
+}

@@ -1,34 +1,58 @@
+import json
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 import pandas as pd
 import time
 from typing import Dict, List, Optional
 from dataclasses import dataclass
+import subprocess
 
 @dataclass
 class ScraperConfig:
     name: str
-    url_file: str
     selectors: Dict[str, str]
     grid_class: str
     output_file: str
+    browser: str  # Add browser field
 
 class WebScraper:
-    def __init__(self, config: ScraperConfig):
+    def __init__(self, config: ScraperConfig, category_mapper: Dict[str, Dict[str, str]]):
         self.config = config
+        self.category_mapper = category_mapper
         self.elements_info = []
         self.driver = self._initialize_driver()
         
     def _initialize_driver(self) -> webdriver.Chrome:
-        chrome_options = Options()
-        chrome_options.add_argument('--ignore-certificate-errors')
-        chrome_options.add_argument('--ignore-ssl-errors')
-        service = Service(ChromeDriverManager().install())
-        return webdriver.Chrome(service=service, options=chrome_options)
+        if self.config.browser.lower() == 'chrome':
+            chrome_options = ChromeOptions()
+            chrome_options.add_argument('--ignore-certificate-errors')
+            chrome_options.add_argument('--ignore-ssl-errors')
+            service = ChromeService(ChromeDriverManager().install())
+            return webdriver.Chrome(service=service, options=chrome_options)
+        elif self.config.browser.lower() == 'firefox':
+            firefox_options = FirefoxOptions()
+            firefox_options.add_argument('--ignore-certificate-errors')
+            firefox_options.add_argument('--ignore-ssl-errors')
+            service = FirefoxService(GeckoDriverManager().install())
+            return webdriver.Firefox(service=service, options=firefox_options)
+        elif self.config.browser.lower() == 'edge':
+            edge_options = EdgeOptions()
+            edge_options.add_argument('--ignore-certificate-errors')
+            edge_options.add_argument('--ignore-ssl-errors')
+            service = EdgeService(EdgeChromiumDriverManager().install())
+            return webdriver.Edge(service=service, options=edge_options)
+        else:
+            raise ValueError(f"Unsupported browser: {self.config.browser}")
 
     def extract_element_info(self, category_name: str) -> None:
         try:
@@ -46,7 +70,6 @@ class WebScraper:
                 current_price_element = self.driver.find_element(By.XPATH, self.config.selectors['current_price_fallback'])
             current_price = current_price_element.text.strip()
             
-            # Extract optional elements
             product_info = {
                 'Resim': image_url,
                 'Ürün Adı': product_name,
@@ -55,7 +78,7 @@ class WebScraper:
                 'Kaynak': self.driver.current_url,
                 'Tarih': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
             }
-            
+
             # Add optional fields if configured
             for field, selector in self.config.selectors.items():
                 if field not in ['image', 'product_name', 'current_price', 'current_price_fallback']:
@@ -65,20 +88,32 @@ class WebScraper:
                             value = element.text.split(': ')[1] if ': ' in element.text else element.text
                         else:
                             value = element.text.strip()
-                        product_info[field] = value
+                        product_info['Ürün Kodu'] = value
                     except NoSuchElementException:
-                        product_info[field] = "-"
-            
+                        product_info['Ürün Kodu'] = "-"
+
+            # Extract old price if available
+            if 'old_price' in self.config.selectors:
+                try:
+                    old_price_element = self.driver.find_element(By.XPATH, self.config.selectors['old_price'])
+                    old_price = old_price_element.text.strip()
+                    product_info['Eski Fiyat'] = old_price
+                except NoSuchElementException:
+                    product_info['Eski Fiyat'] = "-"
+
+            # Extract description if available
+            if 'description' in self.config.selectors:
+                try:
+                    description_element = self.driver.find_element(By.XPATH, self.config.selectors['description'])
+                    description = description_element.text.strip()
+                    product_info['Açıklama'] = description
+                except NoSuchElementException:
+                    product_info['Açıklama'] = "-"
+
             self.elements_info.append(product_info)
             
         except Exception as e:
             print(f"Element not found: {e}")
-
-    def extract_category_name(self, url: str) -> str:
-        category_name = url.rstrip('/').split('/')[-1]
-        if "-c-" in url:
-            category_name = url.split("-c-")[0].rstrip('/').split('/')[-1]
-        return category_name.replace('-', ' ').title()
 
     def scroll_page(self) -> None:
         scroll_pause_time = 2
@@ -92,99 +127,77 @@ class WebScraper:
                 break
             last_height = new_height
 
-    def scrape(self) -> None:
-        with open(self.config.url_file, 'r') as file:
-            urls = [line.strip() for line in file.readlines()]
+    def scrape(self, chosen_category: str) -> None:
+        if chosen_category not in self.category_mapper['categories']:
+            print(f"Category '{chosen_category}' not found in category mapper.")
+            return
 
-        for index, url in enumerate(urls):
-            print(f"Processing {index + 1}/{len(urls)}: {url}")
-            self.driver.get(url)
-            time.sleep(2)
+        urls = self.category_mapper['categories'][chosen_category]
+        if self.config.name not in urls:
+            print(f"Store '{self.config.name}' not found for category '{chosen_category}'.")
+            return
+
+        url = urls[self.config.name]
+        print(f"Processing category '{chosen_category}' with URL: {url}")
+        self.driver.get(url)
+        time.sleep(2)
+        
+        category_name = chosen_category
+        self.scroll_page()
+        
+        try:
+            if self.config.name == "migros":
+                # Special handling for Migros
+                grids = self.driver.find_elements(By.XPATH, 
+                    "//div[contains(@class, 'mdc-layout-grid__inner product-cards list ng-star-inserted')]")
+            else:
+                grids = self.driver.find_elements(By.CLASS_NAME, self.config.grid_class)
             
-            category_name = self.extract_category_name(url)
-            self.scroll_page()
+            print(f"Found {len(grids)} grids")
             
-            try:
-                if self.config.name == "migros":
-                    # Special handling for Migros
-                    grids = self.driver.find_elements(By.XPATH, 
-                        "//div[contains(@class, 'mdc-layout-grid__inner product-cards list ng-star-inserted')]")
-                else:
-                    grids = self.driver.find_elements(By.CLASS_NAME, self.config.grid_class)
+            hrefs = []
+            for grid in grids:
+                links = grid.find_elements(By.XPATH, ".//a[@href]")
+                hrefs.extend([link.get_attribute('href') for link in links if link.is_displayed()])
+            
+            for href_index, href in enumerate(hrefs):
+                print(f"Processing product {href_index + 1}/{len(hrefs)} in {category_name}")
+                self.driver.get(href)
+                time.sleep(2)
+                self.extract_element_info(category_name)
                 
-                print(f"Found {len(grids)} grids")
-                
-                hrefs = []
-                for grid in grids:
-                    links = grid.find_elements(By.XPATH, ".//a[@href]")
-                    hrefs.extend([link.get_attribute('href') for link in links if link.is_displayed()])
-                
-                for href_index, href in enumerate(hrefs):
-                    print(f"Processing product {href_index + 1}/{len(hrefs)} in {category_name}")
-                    self.driver.get(href)
-                    time.sleep(2)
-                    self.extract_element_info(category_name)
-                    
-            except NoSuchElementException:
-                print("No grid found")
+        except NoSuchElementException:
+            print("No grid found")
                 
         self._save_results()
         self.driver.quit()
 
     def _save_results(self) -> None:
+        timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
+        output_file_with_timestamp = f"{self.config.output_file}_{timestamp}.csv"
         df = pd.DataFrame(self.elements_info)
-        df.to_csv(self.config.output_file, index=False, encoding='utf-8-sig')
+        df.to_csv(output_file_with_timestamp, index=False, encoding='utf-8-sig')
+        print(f"Results saved to {output_file_with_timestamp}")
+        
+        # Run text_splitter.py
+        subprocess.run(["python", "text_splitter.py", output_file_with_timestamp])
 
-# Store configurations
-MIGROS_CONFIG = ScraperConfig(
-    name="migros",
-    url_file="migros_category_href.txt",
-    selectors={
-        'image': "//img[@alt]",
-        'product_name': "//h3[@class='text-color-black']",
-        'current_price': "//span[@class='single-price-amount']",
-        'current_price_fallback': "//div[@class='price-new subtitle-1 ng-star-inserted']",
-        'old_price': "//div[@class='price mat-caption-bold']",
-        'description': "//div[@class='product-description desktop-only ng-star-inserted']"
-    },
-    grid_class="mdc-layout-grid__cell--span-2-desktop.mdc-layout-grid__cell--span-4-tablet.mdc-layout-grid__cell--span-2-phone.ng-star-inserted",
-    output_file="migros_elements_info.csv"
-)
+def load_config(file_path: str) -> ScraperConfig:
+    with open(file_path, 'r') as file:
+        config_data = json.load(file)
+    return ScraperConfig(**config_data)
 
-SOK_CONFIG = ScraperConfig(
-    name="sok",
-    url_file="sok_category_href.txt", 
-    selectors={
-        'image': "//img[@alt]",
-        'product_name': "//h1[@class='ProductMainInfoArea_productName__bKRVD']",
-        'product_code': "//div[@class='ProductMainInfoArea_productCode__smjcO']",
-        'current_price': "//span[@class='CPriceBox-module_discountedPrice__15Ffw']",
-        'current_price_fallback': "//span[@class='CPriceBox-module_price__bYk-c']",
-        'old_price': "//div[@class='CPriceBox-module_price__bYk-c']",
-        'description': "//div[@class='ProductDescriptionTab_productDescriptionTab__CGdg7']"
-    },
-    grid_class="PLPProductListing_PLPCardParent__GC2qb",
-    output_file="sok_elements_info.csv"
-)
-
-
-
-A101_CONFIG = ScraperConfig(
-    name="a101",
-    url_file="a101_category_href.txt",
-    selectors={
-        'image': "//img[@alt]",
-        'product_name': "//h1[@class='text-2xl mb-2 font-normal mt-0 w-full']",
-        'current_price': "//div[@class='text-2xl text-[#EA242A]']",
-        'current_price_fallback': "//div[@class='text-2xl text-[#333]']",
-        'product_code': "//div[@class='text-sm text-brand-gray-secondary']",
-        'old_price': "//div[@class='text-base text-[#333] line-through']",
-        'description': "//div[@class='pt-4  mt-4 text-sm font-light  block']"
-    },
-    grid_class="gap-2.grid.grid-cols-3.justify-items-center",
-    output_file="a101_elements_info.csv"
-)
+def load_category_mapper(file_path: str) -> Dict[str, Dict[str, str]]:
+    with open(file_path, 'r') as file:
+        return json.load(file)
 
 # Usage example
-scraper = WebScraper(MIGROS_CONFIG)
-scraper.scrape()
+config_file_path = 'a101_config.json'  # Change this to the desired config file path
+category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
+
+config = load_config(config_file_path)
+category_mapper = load_category_mapper(category_mapper_file_path)
+scraper = WebScraper(config, category_mapper)
+
+chosen_category = "et urunleri"  # Change this to the desired category
+scraper.scrape(chosen_category)

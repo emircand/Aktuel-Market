@@ -1,0 +1,14 @@
+{
+    "name": "sok",
+    "selectors": {
+        "image": "//img[@alt]",
+        "product_name": "//h1[@class='ProductMainInfoArea_productName__bKRVD']",
+        "product_code": "//div[@class='ProductMainInfoArea_productCode__smjcO']",
+        "current_price": "//span[@class='CPriceBox-module_discountedPrice__15Ffw']",
+        "current_price_fallback": "//span[@class='CPriceBox-module_price__bYk-c']",
+        "old_price": "//div[@class='CPriceBox-module_price__bYk-c']",
+        "description": "//div[@class='ProductDescriptionTab_productDescriptionTab__CGdg7']"
+    },
+    "grid_class": "PLPProductListing_PLPCardParent__GC2qb",
+    "output_file": "sok"
+}

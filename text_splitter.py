@@ -1,8 +1,16 @@
 import pandas as pd
 import re
+import sys
+
+# Get the file name from the command-line arguments
+if len(sys.argv) < 2:
+    print("Usage: python text_splitter.py <input_file>")
+    sys.exit(1)
+
+input_file = sys.argv[1]
 
 # Load the data from the CSV file
-df = pd.read_csv('a101_data.csv')
+df = pd.read_csv(input_file)
 
 # Function to extract quantity (Adet) from 'Ürün Adı'
 def extract_adet(product_name):
@@ -40,13 +48,17 @@ def extract_sections(text, keywords):
 df['Adet'] = df['Ürün Adı'].apply(extract_adet)
 df['Birim'], df['Miktar'] = zip(*df['Ürün Adı'].apply(extract_birim_miktar))
 
-# Extract specific sections from 'Açıklama'
-keywords = ["Saklama Koşulları", "İçindekiler", "Besin Değerleri", "Alerjen Uyarısı", "Kullanım Önerisi"]
-sections_df = df['Açıklama'].apply(lambda x: extract_sections(x, keywords))
-sections_df = pd.DataFrame(sections_df.tolist(), index=df.index)
-
-# Merge the sections DataFrame with the original DataFrame
-df = pd.concat([df, sections_df], axis=1)
+# Check if 'Açıklama' column exists
+if 'Açıklama' in df.columns:
+    # Extract specific sections from 'Açıklama'
+    keywords = ["Saklama Koşulları", "İçindekiler", "Besin Değerleri", "Alerjen Uyarısı", "Kullanım Önerisi"]
+    sections_df = df['Açıklama'].apply(lambda x: extract_sections(x, keywords))
+    sections_df = pd.DataFrame(sections_df.tolist(), index=df.index)
+    
+    # Merge the sections DataFrame with the original DataFrame
+    df = pd.concat([df, sections_df], axis=1)
+else:
+    print("Column 'Açıklama' not found in the input file.")
 
 # Reorder columns to place 'Adet', 'Birim', and 'Miktar' next to 'Ürün Adı'
 columns = list(df.columns)
@@ -54,8 +66,12 @@ urun_adi_index = columns.index('Ürün Adı')
 new_columns_order = columns[:urun_adi_index + 1] + ['Adet', 'Birim', 'Miktar'] + columns[urun_adi_index + 1:]
 df = df[new_columns_order]
 
+# Remove duplicated rows
+df = df.drop_duplicates()
+
 # Save the updated dataframe to a new CSV file
-df.to_csv('a101_data_updated.csv', index=False, encoding='utf-8-sig')
+output_file = input_file.replace('.csv', '_updated.csv')
+df.to_csv(output_file, index=False, encoding='utf-8-sig')
 
 # Optionally, print the first few rows to verify
 print(df.head())

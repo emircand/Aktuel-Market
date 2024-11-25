@@ -1,0 +1,14 @@
+{
+    "name": "migros",
+    "browser": "chrome",
+    "selectors": {
+        "image": "//img[@alt]",
+        "product_name": "//h3[@class='text-color-black']",
+        "current_price": "//span[@class='single-price-amount']",
+        "current_price_fallback": "//div[@class='price-new subtitle-1 ng-star-inserted']",
+        "old_price": "//div[@class='price mat-caption-bold']",
+        "description": "//div[@class='product-description desktop-only ng-star-inserted']"
+    },
+    "grid_class": "mdc-layout-grid__cell--span-2-desktop.mdc-layout-grid__cell--span-4-tablet.mdc-layout-grid__cell--span-2-phone.ng-star-inserted",
+    "output_file": "migros"
+}

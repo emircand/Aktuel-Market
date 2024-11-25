@@ -1,0 +1,15 @@
+{
+    "name": "a101",
+    "browser": "chrome",
+    "selectors": {
+        "image": "//img[@alt]",
+        "product_name": "//h1[@class='text-2xl mb-2 font-normal mt-0 w-full']",
+        "current_price": "//div[@class='text-2xl text-[#EA242A]']",
+        "current_price_fallback": "//div[@class='text-2xl text-[#333]']",
+        "product_code": "//div[@class='text-sm text-brand-gray-secondary']",
+        "old_price": "//div[@class='text-base text-[#333] line-through']",
+        "description": "//div[@class='pt-4  mt-4 text-sm font-light  block']"
+    },
+    "grid_class": "gap-2.grid.grid-cols-3.justify-items-center",
+    "output_file": "a101"
+}
