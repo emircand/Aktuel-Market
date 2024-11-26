@@ -2,8 +2,8 @@ import subprocess
 import tkinter as tk
 from tkinter import scrolledtext, ttk
 
-def run_data_scraper(category, marketplace):
-    process = subprocess.Popen(['python', 'data_scraper.py', category, marketplace], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+def run_data_scraper(category, marketplace, browser):
+    process = subprocess.Popen(['python', 'data_scraper.py', category, marketplace, browser], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     for line in process.stdout:
         output_text.insert(tk.END, line)
         output_text.see(tk.END)
@@ -17,7 +17,8 @@ def on_run_button_click():
     output_text.delete(1.0, tk.END)
     category = category_var.get()
     marketplace = marketplace_var.get()
-    run_data_scraper(category, marketplace)
+    browser = browser_var.get()
+    run_data_scraper(category, marketplace, browser)
 
 # Create the main window
 root = tk.Tk()
@@ -42,6 +43,14 @@ marketplace_label.pack(pady=5)
 marketplace_dropdown = ttk.Combobox(root, textvariable=marketplace_var)
 marketplace_dropdown['values'] = sorted(['A101', 'Migros', 'Şok'])
 marketplace_dropdown.pack(pady=5)
+
+# Create dropdown for browser selection
+browser_var = tk.StringVar()
+browser_label = tk.Label(root, text="Tarayıcı Seçin:")
+browser_label.pack(pady=5)
+browser_dropdown = ttk.Combobox(root, textvariable=browser_var)
+browser_dropdown['values'] = sorted(['Chrome', 'Firefox', 'Edge'])
+browser_dropdown.pack(pady=5)
 
 # Create a button to run the data scraper
 run_button = tk.Button(root, text="Veri Çekmeye Başla", command=on_run_button_click)

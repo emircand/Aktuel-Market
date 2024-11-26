@@ -24,36 +24,36 @@ class ScraperConfig:
     selectors: Dict[str, str]
     grid_class: str
     output_file: str
-    browser: str  # Add browser field
 
 class WebScraper:
-    def __init__(self, config: ScraperConfig, category_mapper: Dict[str, Dict[str, str]]):
+    def __init__(self, config: ScraperConfig, category_mapper: Dict[str, Dict[str, str]], browser: str):
         self.config = config
         self.category_mapper = category_mapper
         self.elements_info = []
+        self.browser = browser  # Set browser from argument
         self.driver = self._initialize_driver()
         
     def _initialize_driver(self) -> webdriver.Chrome:
-        if self.config.browser.lower() == 'chrome':
+        if self.browser.lower() == 'chrome':
             chrome_options = ChromeOptions()
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument('--ignore-ssl-errors')
             service = ChromeService(ChromeDriverManager().install())
             return webdriver.Chrome(service=service, options=chrome_options)
-        elif self.config.browser.lower() == 'firefox':
+        elif self.browser.lower() == 'firefox':
             firefox_options = FirefoxOptions()
             firefox_options.add_argument('--ignore-certificate-errors')
             firefox_options.add_argument('--ignore-ssl-errors')
             service = FirefoxService(GeckoDriverManager().install())
             return webdriver.Firefox(service=service, options=firefox_options)
-        elif self.config.browser.lower() == 'edge':
+        elif self.browser.lower() == 'edge':
             edge_options = EdgeOptions()
             edge_options.add_argument('--ignore-certificate-errors')
             edge_options.add_argument('--ignore-ssl-errors')
             service = EdgeService(EdgeChromiumDriverManager().install())
             return webdriver.Edge(service=service, options=edge_options)
         else:
-            raise ValueError(f"Unsupported browser: {self.config.browser}")
+            raise ValueError(f"Unsupported browser: {self.browser}")
 
     def extract_element_info(self, category_name: str) -> None:
         try:
@@ -203,18 +203,19 @@ def normalize_string(input_str: str) -> str:
 
 # Usage example
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python data_scraper.py <category> <marketplace>")
+    if len(sys.argv) != 4:
+        print("Usage: python data_scraper.py <category> <marketplace> <browser>")
         sys.exit(1)
     
     category = normalize_string(sys.argv[1])
     marketplace = normalize_string(sys.argv[2])
+    browser = sys.argv[3].lower()
 
     config_file_path = f'{marketplace}_config.json'  # Config file path based on marketplace
     category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
 
     config = load_config(config_file_path)
     category_mapper = load_category_mapper(category_mapper_file_path)
-    scraper = WebScraper(config, category_mapper)
+    scraper = WebScraper(config, category_mapper, browser)  # Pass browser to WebScraper
 
     scraper.scrape(category)

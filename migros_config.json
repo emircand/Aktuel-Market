@@ -1,6 +1,5 @@
 {
     "name": "migros",
-    "browser": "chrome",
     "selectors": {
         "image": "//img[@alt]",
         "product_name": "//h3[@class='text-color-black']",
