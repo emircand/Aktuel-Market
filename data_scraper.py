@@ -1,4 +1,5 @@
 import json
+import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -191,13 +192,29 @@ def load_category_mapper(file_path: str) -> Dict[str, Dict[str, str]]:
     with open(file_path, 'r') as file:
         return json.load(file)
 
+def normalize_string(input_str: str) -> str:
+    replacements = {
+        'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
+        'Ç': 'C', 'Ğ': 'G', 'İ': 'I', 'Ö': 'O', 'Ş': 'S', 'Ü': 'U'
+    }
+    for turkish_char, english_char in replacements.items():
+        input_str = input_str.replace(turkish_char, english_char)
+    return input_str.lower()
+
 # Usage example
-config_file_path = 'a101_config.json'  # Change this to the desired config file path
-category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python data_scraper.py <category> <marketplace>")
+        sys.exit(1)
+    
+    category = normalize_string(sys.argv[1])
+    marketplace = normalize_string(sys.argv[2])
 
-config = load_config(config_file_path)
-category_mapper = load_category_mapper(category_mapper_file_path)
-scraper = WebScraper(config, category_mapper)
+    config_file_path = f'{marketplace}_config.json'  # Config file path based on marketplace
+    category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
 
-chosen_category = "et urunleri"  # Change this to the desired category
-scraper.scrape(chosen_category)
+    config = load_config(config_file_path)
+    category_mapper = load_category_mapper(category_mapper_file_path)
+    scraper = WebScraper(config, category_mapper)
+
+    scraper.scrape(category)
