@@ -1,2 +1,5 @@
 *.exe
 *.csv
+*.txt
+*.zip
+chromedriver

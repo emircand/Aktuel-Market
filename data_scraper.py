@@ -1,4 +1,5 @@
 import json
+import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -16,6 +17,7 @@ import time
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 import subprocess
+import os
 
 @dataclass
 class ScraperConfig:
@@ -23,36 +25,36 @@ class ScraperConfig:
     selectors: Dict[str, str]
     grid_class: str
     output_file: str
-    browser: str  # Add browser field
 
 class WebScraper:
-    def __init__(self, config: ScraperConfig, category_mapper: Dict[str, Dict[str, str]]):
+    def __init__(self, config: ScraperConfig, category_mapper: Dict[str, Dict[str, str]], browser: str):
         self.config = config
         self.category_mapper = category_mapper
         self.elements_info = []
+        self.browser = browser  # Set browser from argument
         self.driver = self._initialize_driver()
         
     def _initialize_driver(self) -> webdriver.Chrome:
-        if self.config.browser.lower() == 'chrome':
+        if self.browser.lower() == 'chrome':
             chrome_options = ChromeOptions()
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument('--ignore-ssl-errors')
             service = ChromeService(ChromeDriverManager().install())
             return webdriver.Chrome(service=service, options=chrome_options)
-        elif self.config.browser.lower() == 'firefox':
+        elif self.browser.lower() == 'firefox':
             firefox_options = FirefoxOptions()
             firefox_options.add_argument('--ignore-certificate-errors')
             firefox_options.add_argument('--ignore-ssl-errors')
             service = FirefoxService(GeckoDriverManager().install())
             return webdriver.Firefox(service=service, options=firefox_options)
-        elif self.config.browser.lower() == 'edge':
+        elif self.browser.lower() == 'edge':
             edge_options = EdgeOptions()
             edge_options.add_argument('--ignore-certificate-errors')
             edge_options.add_argument('--ignore-ssl-errors')
             service = EdgeService(EdgeChromiumDriverManager().install())
             return webdriver.Edge(service=service, options=edge_options)
         else:
-            raise ValueError(f"Unsupported browser: {self.config.browser}")
+            raise ValueError(f"Unsupported browser: {self.browser}")
 
     def extract_element_info(self, category_name: str) -> None:
         try:
@@ -88,7 +90,10 @@ class WebScraper:
                             value = element.text.split(': ')[1] if ': ' in element.text else element.text
                         else:
                             value = element.text.strip()
-                        product_info['Ürün Kodu'] = value
+                        if self.config.name == 'migros':
+                            product_info['Ürün Kodu'] = "-"
+                        else:
+                            product_info['Ürün Kodu'] = value
                     except NoSuchElementException:
                         product_info['Ürün Kodu'] = "-"
 
@@ -157,7 +162,10 @@ class WebScraper:
             
             hrefs = []
             for grid in grids:
-                links = grid.find_elements(By.XPATH, ".//a[@href]")
+                if self.config.name == "migros":
+                    links = grid.find_elements(By.XPATH, ".//a[@href and @id='product-name']")
+                else:
+                    links = grid.find_elements(By.XPATH, ".//a[@href]")
                 hrefs.extend([link.get_attribute('href') for link in links if link.is_displayed()])
             
             for href_index, href in enumerate(hrefs):
@@ -174,13 +182,21 @@ class WebScraper:
 
     def _save_results(self) -> None:
         timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
-        output_file_with_timestamp = f"{self.config.output_file}_{timestamp}.csv"
+        output_directory = os.path.join("marketplace", self.config.name)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        
+        output_file_with_timestamp = os.path.join(output_directory, f"{self.config.output_file}_{timestamp}.csv")
         df = pd.DataFrame(self.elements_info)
+        
+        # Remove duplicated rows
+        df = df.drop_duplicates()
+        
         df.to_csv(output_file_with_timestamp, index=False, encoding='utf-8-sig')
         print(f"Results saved to {output_file_with_timestamp}")
         
-        # Run text_splitter.py
-        subprocess.run(["python", "text_splitter.py", output_file_with_timestamp])
+        # Run text_splitter.py with the marketplace directory
+        subprocess.run(["python", "text_splitter.py", output_file_with_timestamp, output_directory])
 
 def load_config(file_path: str) -> ScraperConfig:
     with open(file_path, 'r') as file:
@@ -191,13 +207,30 @@ def load_category_mapper(file_path: str) -> Dict[str, Dict[str, str]]:
     with open(file_path, 'r') as file:
         return json.load(file)
 
+def normalize_string(input_str: str) -> str:
+    replacements = {
+        'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
+        'Ç': 'C', 'Ğ': 'G', 'İ': 'I', 'Ö': 'O', 'Ş': 'S', 'Ü': 'U'
+    }
+    for turkish_char, english_char in replacements.items():
+        input_str = input_str.replace(turkish_char, english_char)
+    return input_str.lower()
+
 # Usage example
-config_file_path = 'a101_config.json'  # Change this to the desired config file path
-category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
+if __name__ == "__main__":
+    if len(sys.argv) != 4:
+        print("Usage: python data_scraper.py <category> <marketplace> <browser>")
+        sys.exit(1)
+    
+    category = normalize_string(sys.argv[1])
+    marketplace = normalize_string(sys.argv[2])
+    browser = sys.argv[3].lower()
 
-config = load_config(config_file_path)
-category_mapper = load_category_mapper(category_mapper_file_path)
-scraper = WebScraper(config, category_mapper)
+    config_file_path = f'{marketplace}_config.json'  # Config file path based on marketplace
+    category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
 
-chosen_category = "et urunleri"  # Change this to the desired category
-scraper.scrape(chosen_category)
+    config = load_config(config_file_path)
+    category_mapper = load_category_mapper(category_mapper_file_path)
+    scraper = WebScraper(config, category_mapper, browser)  # Pass browser to WebScraper
+
+    scraper.scrape(category)
