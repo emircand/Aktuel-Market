@@ -1,5 +1,4 @@
 import json
-import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -24,36 +23,36 @@ class ScraperConfig:
     selectors: Dict[str, str]
     grid_class: str
     output_file: str
+    browser: str  # Add browser field
 
 class WebScraper:
-    def __init__(self, config: ScraperConfig, category_mapper: Dict[str, Dict[str, str]], browser: str):
+    def __init__(self, config: ScraperConfig, category_mapper: Dict[str, Dict[str, str]]):
         self.config = config
         self.category_mapper = category_mapper
         self.elements_info = []
-        self.browser = browser  # Set browser from argument
         self.driver = self._initialize_driver()
         
     def _initialize_driver(self) -> webdriver.Chrome:
-        if self.browser.lower() == 'chrome':
+        if self.config.browser.lower() == 'chrome':
             chrome_options = ChromeOptions()
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument('--ignore-ssl-errors')
             service = ChromeService(ChromeDriverManager().install())
             return webdriver.Chrome(service=service, options=chrome_options)
-        elif self.browser.lower() == 'firefox':
+        elif self.config.browser.lower() == 'firefox':
             firefox_options = FirefoxOptions()
             firefox_options.add_argument('--ignore-certificate-errors')
             firefox_options.add_argument('--ignore-ssl-errors')
             service = FirefoxService(GeckoDriverManager().install())
             return webdriver.Firefox(service=service, options=firefox_options)
-        elif self.browser.lower() == 'edge':
+        elif self.config.browser.lower() == 'edge':
             edge_options = EdgeOptions()
             edge_options.add_argument('--ignore-certificate-errors')
             edge_options.add_argument('--ignore-ssl-errors')
             service = EdgeService(EdgeChromiumDriverManager().install())
             return webdriver.Edge(service=service, options=edge_options)
         else:
-            raise ValueError(f"Unsupported browser: {self.browser}")
+            raise ValueError(f"Unsupported browser: {self.config.browser}")
 
     def extract_element_info(self, category_name: str) -> None:
         try:
@@ -192,30 +191,13 @@ def load_category_mapper(file_path: str) -> Dict[str, Dict[str, str]]:
     with open(file_path, 'r') as file:
         return json.load(file)
 
-def normalize_string(input_str: str) -> str:
-    replacements = {
-        'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
-        'Ç': 'C', 'Ğ': 'G', 'İ': 'I', 'Ö': 'O', 'Ş': 'S', 'Ü': 'U'
-    }
-    for turkish_char, english_char in replacements.items():
-        input_str = input_str.replace(turkish_char, english_char)
-    return input_str.lower()
-
 # Usage example
-if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python data_scraper.py <category> <marketplace> <browser>")
-        sys.exit(1)
-    
-    category = normalize_string(sys.argv[1])
-    marketplace = normalize_string(sys.argv[2])
-    browser = sys.argv[3].lower()
+config_file_path = 'a101_config.json'  # Change this to the desired config file path
+category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
 
-    config_file_path = f'{marketplace}_config.json'  # Config file path based on marketplace
-    category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
+config = load_config(config_file_path)
+category_mapper = load_category_mapper(category_mapper_file_path)
+scraper = WebScraper(config, category_mapper)
 
-    config = load_config(config_file_path)
-    category_mapper = load_category_mapper(category_mapper_file_path)
-    scraper = WebScraper(config, category_mapper, browser)  # Pass browser to WebScraper
-
-    scraper.scrape(category)
+chosen_category = "et urunleri"  # Change this to the desired category
+scraper.scrape(chosen_category)
