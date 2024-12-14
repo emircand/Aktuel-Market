@@ -86,7 +86,7 @@
                 }
             }
         },
-        "sut urunleri kahvaltilik": {
+        "süt ürünleri ve kahvaltılık": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/sut-kahvaltilik-c-4"
             },
@@ -138,7 +138,7 @@
                 }
             }
         },
-        "firin": {
+        "fırın": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/firin-pastane-c-7e"
             },
@@ -185,7 +185,7 @@
                 }
             }
         },
-        "temel gida": {
+        "temel gıda": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/temel-gida-c-5"
             },
@@ -242,7 +242,7 @@
                 }
             }
         },
-        "atistirmalik": {
+        "atıştırmalık": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/atistirmalik-c-113fb"
             },
@@ -309,7 +309,7 @@
                 }
             }
         },
-        "donuk urunler": {
+        "donuk ürünler": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/meze-hazir-yemek-donuk-c-7d"
             },
@@ -363,7 +363,7 @@
                 }
             }
         },
-        "temizlik urunleri": {
+        "temizlik ürünleri": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/deterjan-temizlik-c-7"
             },
@@ -405,7 +405,7 @@
                 }
             }
         },
-        "kisisel bakım": {
+        "kişisel bakım": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/kisisel-bakim-kozmetik-saglik-c-8"
             },
@@ -472,7 +472,7 @@
                 }
             }
         },
-        "kağıt urunleri": {
+        "kağıt ürünleri": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/kagit-islak-mendil-c-8d"
             },
@@ -608,7 +608,7 @@
                 }
             }
         },
-        "ev yasam": {
+        "ev yaşam": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/ev-yasam-c-a"
             },
@@ -675,7 +675,7 @@
                 }
             }
         },
-        "kirtasiye": {
+        "kırtasiye": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/kitap-kirtasiye-oyuncak-c-118ec"
             },
