@@ -1,21 +1,21 @@
 {
     "categories": {
-        "içecek": {
+        "icecek": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/icecek-c-6"
             },
             "subcategories": {
-                "gazlı içecek": {
+                "gazli icecek": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/gazli-icecek-c-80?sayfa=1"
                     }
                 },
-                "gazsız içecek": {
+                "gazsiz icecek": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/gazsiz-icecek-c-81?sayfa=1"
                     }
                 },
-                "çay": {
+                "cay": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/cay-c-475?sayfa=1"
                     }
@@ -52,19 +52,19 @@
                         "migros": "https://www.migros.com.tr/sebze-c-66?sayfa=1"
                     }
                 },
-                "yetiştirme kiti": {
+                "yetistirme kiti": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/yetistirme-kiti-c-118b1?sayfa=1"
                     }
                 }
             }
         },
-        "et ürünleri": {
+        "et urunleri": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/et-tavuk-balik-c-3"
             },
             "subcategories": {
-                "kırmızı et": {
+                "kirmizi et": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/kirmizi-et-c-68?sayfa=1"
                     }
@@ -74,24 +74,24 @@
                         "migros": "https://www.migros.com.tr/beyaz-et-c-69?sayfa=1"
                     }
                 },
-                "balık, deniz ürünleri": {
+                "balik, deniz urunleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/balik-deniz-urunleri-c-6a?sayfa=1"
                     }
                 },
-                "et şarküteri": {
+                "et sarkuteri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/et-sarkuteri-c-6b?sayfa=1"
                     }
                 }
             }
         },
-        "süt ürünleri ve kahvaltılık": {
+        "sut urunleri ve kahvaltilik": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/sut-kahvaltilik-c-4"
             },
             "subcategories": {
-                "süt": {
+                "sut": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/sut-c-6c?sayfa=1"
                     }
@@ -101,12 +101,12 @@
                         "migros": "https://www.migros.com.tr/peynir-c-6d?sayfa=1"
                     }
                 },
-                "yoğurt": {
+                "yogurt": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/yogurt-c-6e?sayfa=1"
                     }
                 },
-                "tereyağı": {
+                "tereyagi": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/tereyagi-c-413?sayfa=1"
                     }
@@ -126,19 +126,19 @@
                         "migros": "https://www.migros.com.tr/zeytin-c-71?sayfa=1"
                     }
                 },
-                "sütlü tatlı, krema": {
+                "sutlu tatli, krema": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/sutlu-tatli-krema-c-72?sayfa=1"
                     }
                 },
-                "kahvaltılıklar": {
+                "kahvaltiliklar": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/kahvaltiliklar-c-73?sayfa=1"
                     }
                 }
             }
         },
-        "fırın": {
+        "firin": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/firin-pastane-c-7e"
             },
@@ -148,7 +148,7 @@
                         "migros": "https://www.migros.com.tr/ekmek-c-455?sayfa=1"
                     }
                 },
-                "sabah sıcakları": {
+                "sabah sicaklari": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/sabah-sicaklari-c-456?sayfa=1"
                     }
@@ -158,7 +158,7 @@
                         "migros": "https://www.migros.com.tr/hamur-pasta-malzemeleri-c-45e?sayfa=1"
                     }
                 },
-                "yufka, erişte, mantı": {
+                "yufka, eriste, manti": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/yufka-eriste-manti-c-458?sayfa=1"
                     }
@@ -178,14 +178,14 @@
                         "migros": "https://www.migros.com.tr/galeta-grissini-gevrek-c-45a?sayfa=1"
                     }
                 },
-                "tatlı": {
+                "tatli": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/tatli-c-45b?sayfa=1"
                     }
                 }
             }
         },
-        "temel gıda": {
+        "temel gida": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/temel-gida-c-5"
             },
@@ -200,12 +200,12 @@
                         "migros": "https://www.migros.com.tr/bakliyat-c-428?sayfa=1"
                     }
                 },
-                "sıvı yağ": {
+                "sivi yag": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/sivi-yag-c-76?sayfa=1"
                     }
                 },
-                "tuz, baharat, harç": {
+                "tuz, baharat, harc": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/tuz-baharat-harc-c-77?sayfa=1"
                     }
@@ -230,19 +230,19 @@
                         "migros": "https://www.migros.com.tr/un-c-45f?sayfa=1"
                     }
                 },
-                "şeker": {
+                "seker": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/seker-c-ac?sayfa=1"
                     }
                 },
-                "özel beslenme ürünleri": {
+                "ozel beslenme urunleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/ozel-beslenme-urunleri-c-7f?sayfa=1"
                     }
                 }
             }
         },
-        "atıştırmalık": {
+        "atistirmalik": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/atistirmalik-c-113fb"
             },
@@ -252,7 +252,7 @@
                         "migros": "https://www.migros.com.tr/kuru-meyve-c-441?sayfa=1"
                     }
                 },
-                "kuruyemiş": {
+                "kuruyemis": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/kuruyemis-c-442?sayfa=1"
                     }
@@ -262,7 +262,7 @@
                         "migros": "https://www.migros.com.tr/cips-c-440?sayfa=1"
                     }
                 },
-                "çikolata": {
+                "cikolata": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/cikolata-c-439?sayfa=1"
                     }
@@ -272,12 +272,12 @@
                         "migros": "https://www.migros.com.tr/gofret-c-43a?sayfa=1"
                     }
                 },
-                "bar, kaplamalılar": {
+                "bar, kaplamalilar": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/bar-kaplamalilar-c-43b?sayfa=1"
                     }
                 },
-                "bisküvi": {
+                "biskuvi": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/biskuvi-c-43c?sayfa=1"
                     }
@@ -292,24 +292,24 @@
                         "migros": "https://www.migros.com.tr/kraker-c-27ea?sayfa=1"
                     }
                 },
-                "mısır ve pirinç patlağı": {
+                "misir ve pirinc patlagi": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/misir-ve-pirinc-patlagi-c-1202e?sayfa=1"
                     }
                 },
-                "şekerleme": {
+                "sekerleme": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/sekerleme-c-444?sayfa=1"
                     }
                 },
-                "sakız": {
+                "sakiz": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/sakiz-c-443?sayfa=1"
                     }
                 }
             }
         },
-        "donuk ürünler": {
+        "donuk urunler": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/meze-hazir-yemek-donuk-c-7d"
             },
@@ -319,7 +319,7 @@
                         "migros": "https://www.migros.com.tr/meze-c-44e?sayfa=1"
                     }
                 },
-                "paketli sandviç": {
+                "paketli sandvic": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/paketli-sandvic-c-2837?sayfa=1"
                     }
@@ -329,12 +329,12 @@
                         "migros": "https://www.migros.com.tr/pratik-yemek-c-44f?sayfa=1"
                     }
                 },
-                "dondurulmuş gıda": {
+                "dondurulmus gida": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/dondurulmus-gida-c-7c?sayfa=1"
                     }
                 },
-                "pişmeye hazır etler": {
+                "pismeye hazir etler": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/pismeye-hazir-etler-c-11fd7?sayfa=1"
                     }
@@ -363,17 +363,17 @@
                 }
             }
         },
-        "temizlik ürünleri": {
+        "temizlik urunleri": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/deterjan-temizlik-c-7"
             },
             "subcategories": {
-                "çamaşır yıkama": {
+                "camasir yikama": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/camasir-yikama-c-86?sayfa=1"
                     }
                 },
-                "bulaşık yıkama": {
+                "bulasik yikama": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/bulasik-yikama-c-87?sayfa=1"
                     }
@@ -388,29 +388,29 @@
                         "migros": "https://www.migros.com.tr/temizlik-malzemeleri-c-89?sayfa=1"
                     }
                 },
-                "banyo gereçleri": {
+                "banyo gerecleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/banyo-gerecleri-c-8b?sayfa=1"
                     }
                 },
-                "çamaşır gereçleri": {
+                "camasir gerecleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/camasir-gerecleri-c-8a?sayfa=1"
                     }
                 },
-                "çöp poşeti": {
+                "cop poseti": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/cop-poseti-c-11359?sayfa=1"
                     }
                 }
             }
         },
-        "kişisel bakım": {
+        "kisisel bakim": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/kisisel-bakim-kozmetik-saglik-c-8"
             },
             "subcategories": {
-                "güneş bakım": {
+                "gunes bakim": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/gunes-bakim-c-94?sayfa=1"
                     }
@@ -420,32 +420,32 @@
                         "migros": "https://www.migros.com.tr/hijyenik-ped-c-96?sayfa=1"
                     }
                 },
-                "ağız bakım ürünleri": {
+                "agiz bakim urunleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/agiz-bakim-urunleri-c-8e?sayfa=1"
                     }
                 },
-                "saç bakım": {
+                "sac bakim": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/sac-bakim-c-8f?sayfa=1"
                     }
                 },
-                "duş, banyo, sabun": {
+                "dus, banyo, sabun": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/dus-banyo-sabun-c-92?sayfa=1"
                     }
                 },
-                "tıraş malzemeleri": {
+                "tiras malzemeleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/tiras-malzemeleri-c-90?sayfa=1"
                     }
                 },
-                "ağda, epilasyon": {
+                "agda, epilasyon": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/agda-epilasyon-c-91?sayfa=1"
                     }
                 },
-                "cilt bakımı": {
+                "cilt bakimi": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/cilt-bakimi-c-93?sayfa=1"
                     }
@@ -455,7 +455,7 @@
                         "migros": "https://www.migros.com.tr/kolonya-c-4cf?sayfa=1"
                     }
                 },
-                "parfüm, deodorant": {
+                "parfum, deodorant": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/parfum-deodorant-c-97?sayfa=1"
                     }
@@ -465,39 +465,39 @@
                         "migros": "https://www.migros.com.tr/makyaj-c-95?sayfa=1"
                     }
                 },
-                "sağlık ürünleri": {
+                "saglik urunleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/saglik-urunleri-c-98?sayfa=1"
                     }
                 }
             }
         },
-        "kağıt ürünleri": {
+        "kagit urunleri": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/kagit-islak-mendil-c-8d"
             },
             "subcategories": {
-                "ıslak mendil": {
+                "islak mendil": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/islak-mendil-c-49e?sayfa=1"
                     }
                 },
-                "tuvalet kağıdı": {
+                "tuvalet kagidi": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/tuvalet-kagidi-c-49c?sayfa=1"
                     }
                 },
-                "kağıt havlu": {
+                "kagit havlu": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/kagit-havlu-c-49d?sayfa=1"
                     }
                 },
-                "peçete": {
+                "pecete": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/pecete-c-49f?sayfa=1"
                     }
                 },
-                "kağıt mendil": {
+                "kagit mendil": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/kagit-mendil-c-11444?sayfa=1"
                     }
@@ -509,17 +509,17 @@
                 "migros": "https://www.migros.com.tr/sanalmarket/elektronik-c-a6"
             },
             "subcategories": {
-                "telefon ve aksesuarları": {
+                "telefon ve aksesuarlari": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/telefon-ve-aksesuarlari-c-525?sayfa=1"
                     }
                 },
-                "bilgisayar ve aksesuarları": {
+                "bilgisayar ve aksesuarlari": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/bilgisayar-ve-aksesuarlari-c-523?sayfa=1"
                     }
                 },
-                "beyaz eşya": {
+                "beyaz esya": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/beyaz-esya-c-521?sayfa=1"
                     }
@@ -529,27 +529,27 @@
                         "migros": "https://www.migros.com.tr/elektrikli-ev-aletleri-c-522?sayfa=1"
                     }
                 },
-                "oyun konsolları": {
+                "oyun konsollari": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/oyun-konsollari-c-2ad4?sayfa=1"
                     }
                 },
-                "görüntü ve ses sistemleri": {
+                "goruntu ve ses sistemleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/goruntu-ve-ses-sistemleri-c-524?sayfa=1"
                     }
                 },
-                "hobi, eğlence": {
+                "hobi, eglence": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/hobi-eglence-c-526?sayfa=1"
                     }
                 },
-                "isıtma, soğutma": {
+                "isitma, sogutma": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/isitma-sogutma-c-11229?sayfa=1"
                     }
                 },
-                "aydınlatma, elektrik malzemeleri": {
+                "aydinlatma, elektrik malzemeleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/aydinlatma-elektrik-malzemeleri-c-520?sayfa=1"
                     }
@@ -566,7 +566,7 @@
                         "migros": "https://www.migros.com.tr/bebek-bezi-c-ab?sayfa=1"
                     }
                 },
-                "bebek bakım": {
+                "bebek bakim": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/bebek-bakim-c-4d8?sayfa=1"
                     }
@@ -581,12 +581,12 @@
                         "migros": "https://www.migros.com.tr/bebek-banyo-c-4d7?sayfa=1"
                     }
                 },
-                "bebek deterjanı ve yumuşatıcısı": {
+                "bebek deterjani ve yumusaticisi": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/bebek-deterjani-ve-yumusaticisi-c-297b?sayfa=1"
                     }
                 },
-                "bebek taşıma": {
+                "bebek tasima": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/bebek-tasima-c-4e0?sayfa=1"
                     }
@@ -601,19 +601,19 @@
                         "migros": "https://www.migros.com.tr/islak-mendil-c-11fe7?sayfa=1"
                     }
                 },
-                "anne ürünleri": {
+                "anne urunleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/anne-urunleri-c-9a?sayfa=1"
                     }
                 }
             }
         },
-        "ev yaşam": {
+        "ev yasam": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/ev-yasam-c-a"
             },
             "subcategories": {
-                "mutfak eşyaları": {
+                "mutfak esyalari": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/mutfak-esyalari-c-9f?sayfa=1"
                     }
@@ -623,7 +623,7 @@
                         "migros": "https://www.migros.com.tr/mobilya-dekorasyon-c-a4?sayfa=1"
                     }
                 },
-                "bahçe ve piknik malzemeleri": {
+                "bahce ve piknik malzemeleri": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/bahce-ve-piknik-malzemeleri-c-a2?sayfa=1"
                     }
@@ -653,7 +653,7 @@
                         "migros": "https://www.migros.com.tr/ampul-c-2ac8?sayfa=1"
                     }
                 },
-                "hırdavat": {
+                "hirdavat": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/hirdavat-c-500?sayfa=1"
                     }
@@ -663,7 +663,7 @@
                         "migros": "https://www.migros.com.tr/oto-aksesuar-c-4ff?sayfa=1"
                     }
                 },
-                "çakmak": {
+                "cakmak": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/cakmak-c-11413?sayfa=1"
                     }
@@ -675,7 +675,7 @@
                 }
             }
         },
-        "kırtasiye": {
+        "kirtasiye": {
             "urls": {
                 "migros": "https://www.migros.com.tr/sanalmarket/kitap-kirtasiye-oyuncak-c-118ec"
             },
@@ -685,7 +685,7 @@
                         "migros": "https://www.migros.com.tr/kitap-dergi-gazete-c-a5?sayfa=1"
                     }
                 },
-                "kırtasiye": {
+                "kirtasiye": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/kirtasiye-c-11420?sayfa=1"
                     }
@@ -702,7 +702,7 @@
                 "migros": "https://www.migros.com.tr/sanalmarket/pet-shop-c-a0"
             },
             "subcategories": {
-                "köpek": {
+                "kopek": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/kopek-c-4f4?sayfa=1"
                     }
@@ -712,12 +712,12 @@
                         "migros": "https://www.migros.com.tr/kedi-c-4f5?sayfa=1"
                     }
                 },
-                "kuş": {
+                "kus": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/kus-c-11625?sayfa=1"
                     }
                 },
-                "pet aksesuarları": {
+                "pet aksesuarlari": {
                     "urls": {
                         "migros": "https://www.migros.com.tr/pet-aksesuarlari-c-4f6?sayfa=1"
                     }
