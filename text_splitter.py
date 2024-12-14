@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import sys
+import os
 
 # Get the file name from the command-line arguments
 if len(sys.argv) < 2:
@@ -14,28 +15,34 @@ df = pd.read_csv(input_file)
 
 # Function to extract quantity (Adet) from 'Ürün Adı'
 def extract_adet(product_name):
+    if pd.isna(product_name):
+        return None
     reversed_name = product_name[::-1]
-    match = re.search(r'[lL][iİıIuUüÜ][\'’]?\s*(\d+)', reversed_name, re.IGNORECASE)
+    match = re.search(r'[lL][iİıIuUüÜ][\'\']?\s*(\d+)', reversed_name, re.IGNORECASE)
     if match:
-        return match.group(1)[::-1]  # Return the quantity found, reversed back
+        return match.group(1)[::-1]
     match = re.search(r'x\s*(\d+)', reversed_name, re.IGNORECASE)
     if match:
-        return match.group(1)[::-1]  # Return the quantity found before 'x', reversed back
-    return None  # Return None if no quantity is found
+        return match.group(1)[::-1]
+    return None
 
 # Function to extract unit and amount (Birim and Miktar) from 'Ürün Adı'
 def extract_birim_miktar(product_name):
+    if pd.isna(product_name):
+        return None, None
     reversed_name = product_name[::-1]
     match = re.search(r'([a-zA-Z]+)\s*(\d+)', reversed_name)
     if match:
-        return match.group(1)[::-1], match.group(2)[::-1]  # Return the unit and amount found, reversed back
+        return match.group(1)[::-1], match.group(2)[::-1]
     match = re.search(r'([a-zA-Z]+)\s*(\d+)\s*x', reversed_name, re.IGNORECASE)
     if match:
-        return match.group(1)[::-1], match.group(2)[::-1]  # Return the unit and amount found after 'x', reversed back
-    return None, None  # Return None if no unit and amount are found
+        return match.group(1)[::-1], match.group(2)[::-1]
+    return None, None
 
 # Function to extract specific sections from 'Açıklama' until the next keyword occurs
 def extract_sections(text, keywords):
+    if pd.isna(text):
+        return {keyword: None for keyword in keywords}
     sections = {keyword: None for keyword in keywords}
     pattern = re.compile(r'(' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\s*(?:\:)?\s*(.*?)(?=' + '|'.join(r'\s*' + re.escape(keyword) + r'\s*(?:\:)?' for keyword in keywords) + r'|$)', re.DOTALL)
     matches = pattern.findall(text)
@@ -43,6 +50,9 @@ def extract_sections(text, keywords):
         keyword, content = match
         sections[keyword.strip()] = content.strip()
     return sections
+
+# Fill NaN values with empty strings in the 'Açıklama' column
+df['Açıklama'] = df['Açıklama'].fillna('')
 
 # Apply the functions to the 'Ürün Adı' column to create 'Adet', 'Birim', and 'Miktar'
 df['Adet'] = df['Ürün Adı'].apply(extract_adet)
@@ -73,5 +83,4 @@ df = df.drop_duplicates()
 output_file = input_file.replace('.csv', '_updated.csv')
 df.to_csv(output_file, index=False, encoding='utf-8-sig')
 
-# Optionally, print the first few rows to verify
-print(df.head())
+print(f"Results saved to {output_file}")

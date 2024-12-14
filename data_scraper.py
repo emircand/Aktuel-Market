@@ -12,6 +12,8 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from urllib.parse import urljoin, urlparse
+from selenium.common.exceptions import InvalidArgumentException
 import pandas as pd
 import time
 from typing import Dict, List, Optional
@@ -39,18 +41,24 @@ class WebScraper:
             chrome_options = ChromeOptions()
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument('--ignore-ssl-errors')
+            chrome_options.add_argument('--disable-web-security')
+            chrome_options.add_argument('--allow-running-insecure-content')
             service = ChromeService(ChromeDriverManager().install())
             return webdriver.Chrome(service=service, options=chrome_options)
         elif self.browser.lower() == 'firefox':
             firefox_options = FirefoxOptions()
             firefox_options.add_argument('--ignore-certificate-errors')
             firefox_options.add_argument('--ignore-ssl-errors')
+            firefox_options.add_argument('--disable-web-security')
+            firefox_options.add_argument('--allow-running-insecure-content')
             service = FirefoxService(GeckoDriverManager().install())
             return webdriver.Firefox(service=service, options=firefox_options)
         elif self.browser.lower() == 'edge':
             edge_options = EdgeOptions()
             edge_options.add_argument('--ignore-certificate-errors')
             edge_options.add_argument('--ignore-ssl-errors')
+            edge_options.add_argument('--disable-web-security')
+            edge_options.add_argument('--allow-running-insecure-content')
             service = EdgeService(EdgeChromiumDriverManager().install())
             return webdriver.Edge(service=service, options=edge_options)
         else:
@@ -60,7 +68,7 @@ class WebScraper:
         try:
             # Extract common elements using configured selectors
             image_element = self.driver.find_element(By.XPATH, self.config.selectors['image'])
-            image_url = image_element.get_attribute('src')
+            image_url = image_element.get_dom_attribute('src')
             
             product_name_element = self.driver.find_element(By.XPATH, self.config.selectors['product_name'])
             product_name = product_name_element.text
@@ -142,43 +150,73 @@ class WebScraper:
             print(f"Store '{self.config.name}' not found for category '{chosen_category}'.")
             return
 
-        url = urls[self.config.name]
-        print(f"Processing category '{chosen_category}' with URL: {url}")
-        self.driver.get(url)
-        time.sleep(2)
-        
-        category_name = chosen_category
-        self.scroll_page()
+        base_url = urls[self.config.name]
+        print(f"Processing category '{chosen_category}' with URL: {base_url}")
         
         try:
-            if self.config.name == "migros":
-                # Special handling for Migros
-                grids = self.driver.find_elements(By.XPATH, 
-                    "//div[contains(@class, 'mdc-layout-grid__inner product-cards list ng-star-inserted')]")
-            else:
-                grids = self.driver.find_elements(By.CLASS_NAME, self.config.grid_class)
+            self.driver.get(base_url)
+            time.sleep(2)
             
-            print(f"Found {len(grids)} grids")
+            category_name = chosen_category
+            self.scroll_page()
             
-            hrefs = []
-            for grid in grids:
+            try:
                 if self.config.name == "migros":
-                    links = grid.find_elements(By.XPATH, ".//a[@href and @id='product-name']")
+                    grids = self.driver.find_elements(By.XPATH, 
+                        "//div[contains(@class, 'mdc-layout-grid__inner product-cards list ng-star-inserted')]")
                 else:
-                    links = grid.find_elements(By.XPATH, ".//a[@href]")
-                hrefs.extend([link.get_attribute('href') for link in links if link.is_displayed()])
+                    grids = self.driver.find_elements(By.CLASS_NAME, self.config.grid_class)
+                
+                print(f"Found {len(grids)} grids")
+                
+                hrefs = []
+                for grid in grids:
+                    if self.config.name == "migros":
+                        links = grid.find_elements(By.XPATH, ".//a[@href and @id='product-name']")
+                    else:
+                        links = grid.find_elements(By.XPATH, ".//a[@href]")
+                    
+                    # Ensure URLs are absolute and valid
+                    for link in links:
+                        if link.is_displayed():
+                            href = link.get_dom_attribute('href')
+                            if href:
+                                # Convert relative URLs to absolute
+                                absolute_url = urljoin(base_url, href)
+                                # Validate URL
+                                try:
+                                    parsed = urlparse(absolute_url)
+                                    if all([parsed.scheme, parsed.netloc]):
+                                        hrefs.append(absolute_url)
+                                except Exception as e:
+                                    print(f"Invalid URL: {absolute_url}, Error: {e}")
+                
+                print(f"Found {len(hrefs)} valid product URLs")
+                
+                for href_index, href in enumerate(hrefs):
+                    try:
+                        print(f"Processing product {href_index + 1}/{len(hrefs)} in {category_name}")
+                        print(f"URL: {href}")
+                        self.driver.get(href)
+                        time.sleep(2)
+                        self.extract_element_info(category_name)
+                    except InvalidArgumentException as e:
+                        print(f"Invalid URL: {href}")
+                        print(f"Error: {e}")
+                        continue
+                    except Exception as e:
+                        print(f"Error processing {href}: {e}")
+                        continue
+                    
+            except NoSuchElementException:
+                print("No grid found")
+                    
+            self._save_results()
             
-            for href_index, href in enumerate(hrefs):
-                print(f"Processing product {href_index + 1}/{len(hrefs)} in {category_name}")
-                self.driver.get(href)
-                time.sleep(2)
-                self.extract_element_info(category_name)
-                
-        except NoSuchElementException:
-            print("No grid found")
-                
-        self._save_results()
-        self.driver.quit()
+        except Exception as e:
+            print(f"Error scraping category {chosen_category}: {e}")
+        finally:
+            self.driver.quit()
 
     def _save_results(self) -> None:
         timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
