@@ -4,3 +4,6 @@
 *.zip
 chromedriver
 /marketplace
+category.xml
+category_scraper.py
+categories.json

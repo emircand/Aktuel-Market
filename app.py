@@ -1,9 +1,15 @@
 import subprocess
 import tkinter as tk
 from tkinter import scrolledtext, ttk
+import json
 
-def run_data_scraper(category, marketplace, browser):
-    process = subprocess.Popen(['python', 'data_scraper.py', category, marketplace, browser], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+def load_categories():
+    with open('subcategory_mapper.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    return data['categories']
+
+def run_data_scraper(category_path, marketplace, browser):
+    process = subprocess.Popen(['python', 'data_scraper.py', category_path[0], marketplace, browser] + category_path[1:], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     for line in process.stdout:
         output_text.insert(tk.END, line)
         output_text.see(tk.END)
@@ -15,33 +21,45 @@ def run_data_scraper(category, marketplace, browser):
 
 def on_run_button_click():
     output_text.delete(1.0, tk.END)
-    category = category_var.get()
-    marketplace = marketplace_var.get()
-    browser = browser_var.get()
-    run_data_scraper(category, marketplace, browser)
+    selected_item = category_tree.selection()
+    if selected_item:
+        category_path = []
+        item = selected_item[0]
+        while item:
+            category_path.insert(0, category_tree.item(item, 'text'))
+            item = category_tree.parent(item)
+        marketplace = marketplace_var.get()
+        browser = browser_var.get()
+        run_data_scraper(category_path, marketplace, browser)
+
+# Load categories from subcategory_mapper.json
+categories = load_categories()
 
 # Create the main window
 root = tk.Tk()
 root.title("Data Scraper")
 
-# Create dropdown for category selection
-category_var = tk.StringVar()
+# Create a treeview for category selection
 category_label = tk.Label(root, text="Kategori Seçin:")
 category_label.pack(pady=5)
-category_dropdown = ttk.Combobox(root, textvariable=category_var)
-category_dropdown['values'] = sorted(['içecek', 'meyve sebze', 'et ürünleri',
-                        'süt ürünleri kahvaltılık', 'fırın', 'temel gıda', 
-                        'atıştırmalık', 'donuk ürünler', 'dondurma', 
-                        'temizlik ürünleri', 'kişisel bakım', 'kağıt ürünleri', 
-                        'anne bebek', 'ev yaşam', 'kırtasiye', 'evcil hayvan'])
-category_dropdown.pack(pady=5)
+category_tree = ttk.Treeview(root)
+category_tree.pack(pady=5, fill=tk.BOTH, expand=True)
+
+# Populate the treeview with categories and subcategories
+def populate_treeview(tree, parent, categories):
+    for category, data in categories.items():
+        node = tree.insert(parent, 'end', text=category)
+        if 'subcategories' in data:
+            populate_treeview(tree, node, data['subcategories'])
+
+populate_treeview(category_tree, '', categories)
 
 # Create dropdown for marketplace selection
 marketplace_var = tk.StringVar()
 marketplace_label = tk.Label(root, text="Market Seçin:")
 marketplace_label.pack(pady=5)
 marketplace_dropdown = ttk.Combobox(root, textvariable=marketplace_var)
-marketplace_dropdown['values'] = sorted(['A101', 'Migros', 'Şok'])
+marketplace_dropdown['values'] = sorted(['Migros'])
 marketplace_dropdown.pack(pady=5)
 
 # Create dropdown for browser selection

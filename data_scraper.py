@@ -140,24 +140,18 @@ class WebScraper:
                 break
             last_height = new_height
 
-    def scrape(self, chosen_category: str) -> None:
-        if chosen_category not in self.category_mapper['categories']:
-            print(f"Category '{chosen_category}' not found in category mapper.")
+    def scrape_category(self, category_data: Dict[str, Dict[str, str]], category_name: str) -> None:
+        if 'urls' not in category_data or self.config.name not in category_data['urls']:
+            print(f"Store '{self.config.name}' not found for category '{category_name}'.")
             return
 
-        urls = self.category_mapper['categories'][chosen_category]
-        if self.config.name not in urls:
-            print(f"Store '{self.config.name}' not found for category '{chosen_category}'.")
-            return
-
-        base_url = urls[self.config.name]
-        print(f"Processing category '{chosen_category}' with URL: {base_url}")
+        base_url = category_data['urls'][self.config.name]
+        print(f"Processing category '{category_name}' with URL: {base_url}")
         
         try:
             self.driver.get(base_url)
             time.sleep(2)
             
-            category_name = chosen_category
             self.scroll_page()
             
             try:
@@ -214,9 +208,34 @@ class WebScraper:
             self._save_results()
             
         except Exception as e:
-            print(f"Error scraping category {chosen_category}: {e}")
+            print(f"Error scraping category {category_name}: {e}")
         finally:
             self.driver.quit()
+
+    def scrape(self, chosen_category: str, subcategory_path: Optional[List[str]] = None) -> None:
+        def recursive_scrape(category_data, category_name):
+            self.scrape_category(category_data, category_name)
+            if 'subcategories' in category_data:
+                for subcategory_name, subcategory_data in category_data['subcategories'].items():
+                    print(f"Processing subcategory: {subcategory_name}")
+                    recursive_scrape(subcategory_data, subcategory_name)
+
+        if chosen_category not in self.category_mapper['categories']:
+            print(f"Category '{chosen_category}' not found in category mapper.")
+            return
+
+        category_data = self.category_mapper['categories'][chosen_category]
+
+        # Navigate through the subcategory path if provided
+        if subcategory_path:
+            for subcategory in subcategory_path:
+                if 'subcategories' in category_data and subcategory in category_data['subcategories']:
+                    category_data = category_data['subcategories'][subcategory]
+                else:
+                    print(f"Subcategory '{subcategory}' not found under category '{chosen_category}'.")
+                    return
+
+        recursive_scrape(category_data, chosen_category)
 
     def _save_results(self) -> None:
         timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
@@ -256,19 +275,20 @@ def normalize_string(input_str: str) -> str:
 
 # Usage example
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python data_scraper.py <category> <marketplace> <browser>")
+    if len(sys.argv) < 4:
+        print("Usage: python data_scraper.py <category> <marketplace> <browser> [<subcategory1> <subcategory2> ...]")
         sys.exit(1)
     
-    category = normalize_string(sys.argv[1])
-    marketplace = normalize_string(sys.argv[2])
+    category = sys.argv[1]
+    marketplace = sys.argv[2]
     browser = sys.argv[3].lower()
+    subcategory_path = [sub for sub in sys.argv[4:]] if len(sys.argv) > 4 else None
 
     config_file_path = f'{marketplace}_config.json'  # Config file path based on marketplace
-    category_mapper_file_path = 'category_mapper.json'  # Path to the category mapper file
+    category_mapper_file_path = 'subcategory_mapper.json'  # Path to the category mapper file
 
     config = load_config(config_file_path)
     category_mapper = load_category_mapper(category_mapper_file_path)
     scraper = WebScraper(config, category_mapper, browser)  # Pass browser to WebScraper
 
-    scraper.scrape(category)
+    scraper.scrape(category, subcategory_path)
