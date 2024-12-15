@@ -16,7 +16,7 @@ df = pd.read_csv(input_file)
 # Function to extract quantity (Adet) from 'Ürün Adı'
 def extract_adet(product_name):
     if pd.isna(product_name):
-        return None
+        return 1
     reversed_name = product_name[::-1]
     match = re.search(r'[lL][iİıIuUüÜ][\'\']?\s*(\d+)', reversed_name, re.IGNORECASE)
     if match:
@@ -24,7 +24,7 @@ def extract_adet(product_name):
     match = re.search(r'x\s*(\d+)', reversed_name, re.IGNORECASE)
     if match:
         return match.group(1)[::-1]
-    return None
+    return 1
 
 # Function to extract unit and amount (Birim and Miktar) from 'Ürün Adı'
 def extract_birim_miktar(product_name):
@@ -73,7 +73,7 @@ else:
 # Reorder columns to place 'Adet', 'Birim', and 'Miktar' next to 'Ürün Adı'
 columns = list(df.columns)
 urun_adi_index = columns.index('Ürün Adı')
-new_columns_order = columns[:urun_adi_index + 1] + ['Adet', 'Birim', 'Miktar'] + columns[urun_adi_index + 1:]
+new_columns_order = columns[:urun_adi_index + 1] + ['Adet', 'Birim', 'Miktar'] + [col for col in columns[urun_adi_index + 1:] if col not in ['Adet', 'Birim', 'Miktar']]
 df = df[new_columns_order]
 
 # Remove duplicated rows

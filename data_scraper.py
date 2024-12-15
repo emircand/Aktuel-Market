@@ -11,7 +11,9 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 from urllib.parse import urljoin, urlparse
 from selenium.common.exceptions import InvalidArgumentException
 import pandas as pd
@@ -20,6 +22,7 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 import subprocess
 import os
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
 @dataclass
 class ScraperConfig:
@@ -35,6 +38,7 @@ class WebScraper:
         self.elements_info = []
         self.browser = browser  # Set browser from argument
         self.driver = self._initialize_driver()
+        self.latest_url = None  # Track the latest visited URL
         
     def _initialize_driver(self) -> webdriver.Chrome:
         if self.browser.lower() == 'chrome':
@@ -72,6 +76,9 @@ class WebScraper:
             
             product_name_element = self.driver.find_element(By.XPATH, self.config.selectors['product_name'])
             product_name = product_name_element.text
+
+            brand_name_element = self.driver.find_element(By.XPATH, self.config.selectors['brand'])
+            brand_name = brand_name_element.text
             
             # Extract current price with fallback
             try:
@@ -79,11 +86,20 @@ class WebScraper:
             except NoSuchElementException:
                 current_price_element = self.driver.find_element(By.XPATH, self.config.selectors['current_price_fallback'])
             current_price = current_price_element.text.strip()
+
+            try:
+                old_price_element = self.driver.find_element(By.XPATH, self.config.selectors['old_price'])
+                old_price = old_price_element.text.strip()
+            except NoSuchElementException:
+                old_price = "-"
             
             product_info = {
+                'Market': self.config.name,
                 'Resim': image_url,
                 'Ürün Adı': product_name,
+                'Marka': brand_name,
                 'Son Fiyat': current_price,
+                'Eski Fiyat': old_price,
                 'Kategori': category_name,
                 'Kaynak': self.driver.current_url,
                 'Tarih': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
@@ -105,14 +121,14 @@ class WebScraper:
                     except NoSuchElementException:
                         product_info['Ürün Kodu'] = "-"
 
-            # Extract old price if available
-            if 'old_price' in self.config.selectors:
-                try:
-                    old_price_element = self.driver.find_element(By.XPATH, self.config.selectors['old_price'])
-                    old_price = old_price_element.text.strip()
-                    product_info['Eski Fiyat'] = old_price
-                except NoSuchElementException:
-                    product_info['Eski Fiyat'] = "-"
+            # # Extract old price if available
+            # if 'old_price' in self.config.selectors:
+            #     try:
+            #         old_price_element = self.driver.find_element(By.XPATH, self.config.selectors['old_price'])
+            #         old_price = old_price_element.text.strip()
+            #         product_info['Eski Fiyat'] = old_price
+            #     except NoSuchElementException:
+            #         product_info['Eski Fiyat'] = "-"
 
             # Extract description if available
             if 'description' in self.config.selectors:
@@ -140,70 +156,106 @@ class WebScraper:
                 break
             last_height = new_height
 
+    def go_to_next_page(self, base_url: str, current_page: int) -> bool:
+        # Parse the base URL
+        parsed_url = urlparse(base_url)
+        # Remove the 'sayfa' query parameter if it exists
+        query_params = parse_qs(parsed_url.query)
+        query_params.pop('sayfa', None)
+        # Add the new 'sayfa' query parameter with the incremented page number
+        query_params['sayfa'] = current_page + 1
+        # Reconstruct the URL with the updated query parameters
+        new_query = urlencode(query_params, doseq=True)
+        next_page_url = urlunparse(parsed_url._replace(query=new_query))
+        
+        print(f"Navigating to next page: {next_page_url}")
+        self.driver.get(next_page_url)
+        time.sleep(2)
+        new_url = self.driver.current_url
+        print(f"Current URL: {new_url}")
+        if self.latest_url == new_url:
+            print("Next page URL is the same as current, terminating pagination.")
+            return False
+        self.latest_url = new_url
+        return True
+
     def scrape_category(self, category_data: Dict[str, Dict[str, str]], category_name: str) -> None:
         if 'urls' not in category_data or self.config.name not in category_data['urls']:
             print(f"Store '{self.config.name}' not found for category '{category_name}'.")
             return
 
         base_url = category_data['urls'][self.config.name]
+        self.latest_url = base_url
+        current_page = 1
         print(f"Processing category '{category_name}' with URL: {base_url}")
         
         try:
-            self.driver.get(base_url)
-            time.sleep(2)
-            
-            self.scroll_page()
-            
-            try:
-                if self.config.name == "migros":
-                    grids = self.driver.find_elements(By.XPATH, 
-                        "//div[contains(@class, 'mdc-layout-grid__inner product-cards list ng-star-inserted')]")
-                else:
-                    grids = self.driver.find_elements(By.CLASS_NAME, self.config.grid_class)
+            while True:
+                self.driver.get(f"{base_url}?sayfa={current_page}")
+                time.sleep(2)
                 
-                print(f"Found {len(grids)} grids")
+                self.scroll_page()
                 
-                hrefs = []
-                for grid in grids:
+                try:
                     if self.config.name == "migros":
-                        links = grid.find_elements(By.XPATH, ".//a[@href and @id='product-name']")
+                        grids = self.driver.find_elements(By.XPATH, 
+                            "//div[contains(@class, 'mdc-layout-grid__inner product-cards list ng-star-inserted')]")
                     else:
-                        links = grid.find_elements(By.XPATH, ".//a[@href]")
+                        grids = self.driver.find_elements(By.CLASS_NAME, self.config.grid_class)
                     
-                    # Ensure URLs are absolute and valid
-                    for link in links:
-                        if link.is_displayed():
-                            href = link.get_dom_attribute('href')
-                            if href:
-                                # Convert relative URLs to absolute
-                                absolute_url = urljoin(base_url, href)
-                                # Validate URL
-                                try:
-                                    parsed = urlparse(absolute_url)
-                                    if all([parsed.scheme, parsed.netloc]):
-                                        hrefs.append(absolute_url)
-                                except Exception as e:
-                                    print(f"Invalid URL: {absolute_url}, Error: {e}")
-                
-                print(f"Found {len(hrefs)} valid product URLs")
-                
-                for href_index, href in enumerate(hrefs):
-                    try:
-                        print(f"Processing product {href_index + 1}/{len(hrefs)} in {category_name}")
-                        print(f"URL: {href}")
-                        self.driver.get(href)
-                        time.sleep(2)
-                        self.extract_element_info(category_name)
-                    except InvalidArgumentException as e:
-                        print(f"Invalid URL: {href}")
-                        print(f"Error: {e}")
-                        continue
-                    except Exception as e:
-                        print(f"Error processing {href}: {e}")
-                        continue
+                    if not grids:
+                        print("No grids found")
+                        break
+                    else: 
+                        print(f"Found {len(grids)} grids")
                     
-            except NoSuchElementException:
-                print("No grid found")
+                    hrefs = []
+                    for grid in grids:
+                        if self.config.name == "migros":
+                            links = grid.find_elements(By.XPATH, ".//a[@href and @id='product-name']")
+                        else:
+                            links = grid.find_elements(By.XPATH, ".//a[@href]")
+                        
+                        # Ensure URLs are absolute and valid
+                        for link in links:
+                            if link.is_displayed():
+                                href = link.get_dom_attribute('href')
+                                if href:
+                                    # Convert relative URLs to absolute
+                                    absolute_url = urljoin(base_url, href)
+                                    # Validate URL
+                                    try:
+                                        parsed = urlparse(absolute_url)
+                                        if all([parsed.scheme, parsed.netloc]):
+                                            hrefs.append(absolute_url)
+                                    except Exception as e:
+                                        print(f"Invalid URL: {absolute_url}, Error: {e}")
+                    
+                    print(f"Found {len(hrefs)} valid product URLs")
+                    
+                    for href_index, href in enumerate(hrefs):
+                        try:
+                            print(f"Processing product {href_index + 1}/{len(hrefs)} in {category_name}")
+                            print(f"URL: {href}")
+                            self.driver.get(href)
+                            time.sleep(2)
+                            self.extract_element_info(category_name)
+                        except InvalidArgumentException as e:
+                            print(f"Invalid URL: {href}")
+                            print(f"Error: {e}")
+                            continue
+                        except Exception as e:
+                            print(f"Error processing {href}: {e}")
+                            continue
+
+                    # Check for next page and continue scraping
+                    if not self.go_to_next_page(base_url, current_page):
+                        break
+                    current_page += 1
+                    
+                except NoSuchElementException:
+                    print("No grid found")
+                    break
                     
             self._save_results()
             

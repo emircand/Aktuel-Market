@@ -3,6 +3,8 @@
     "selectors": {
         "image": "//img[contains(@class, 'ng-star-inserted')]",
         "product_name": "//h3[@class='text-color-black']",
+        "next_page": "//button[@id='pagination-button-next']",
+        "brand": "//a[@id='product-detail-brand-name']",
         "current_price": "//div[@class='name-price-wrapper']//div[@class='sale-price mat-caption-bold']",
         "current_price_fallback": "//div[@class='name-price-wrapper']//div[@class='price subtitle-1 ng-star-inserted']",
         "old_price": "//div[@class='name-price-wrapper']//span[@class='single-price-amount']",
