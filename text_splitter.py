@@ -1,7 +1,8 @@
 import pandas as pd
-import re
 import sys
 import os
+import json
+import re
 
 # Get the file name from the command-line arguments
 if len(sys.argv) < 2:
@@ -13,62 +14,87 @@ input_file = sys.argv[1]
 # Load the data from the CSV file
 df = pd.read_csv(input_file)
 
+# Ensure 'Açıklama' column exists
+if 'Açıklama' not in df.columns:
+    df['Açıklama'] = ""
+
+# Fill NaN values with empty strings in the 'Açıklama' column
+df['Açıklama'] = df['Açıklama'].fillna('')
+
 # Function to extract quantity (Adet) from 'Ürün Adı'
 def extract_adet(product_name):
     if pd.isna(product_name):
-        return 1
-    reversed_name = product_name[::-1]
-    match = re.search(r'[lL][iİıIuUüÜ][\'\']?\s*(\d+)', reversed_name, re.IGNORECASE)
+        return None
+    match = re.search(r'(\d+)\s*[\'\']?[lL][iİıIuUüÜ]', product_name, re.IGNORECASE)
     if match:
         return match.group(1)[::-1]
-    match = re.search(r'x\s*(\d+)', reversed_name, re.IGNORECASE)
+    match = re.search(r'x\s*(\d+)', product_name, re.IGNORECASE)
     if match:
         return match.group(1)[::-1]
-    return 1
+    return None
 
 # Function to extract unit and amount (Birim and Miktar) from 'Ürün Adı'
 def extract_birim_miktar(product_name):
     if pd.isna(product_name):
         return None, None
     reversed_name = product_name[::-1]
-    match = re.search(r'([a-zA-Z]+)\s*(\d+)', reversed_name)
+    match = re.search(r'([a-zA-Z]+)\s*([\d,\.]+)', reversed_name)
     if match:
-        return match.group(1)[::-1], match.group(2)[::-1]
-    match = re.search(r'([a-zA-Z]+)\s*(\d+)\s*x', reversed_name, re.IGNORECASE)
+        return match.group(1)[::-1], match.group(2)[::-1].replace(',', '.')
+    match = re.search(r'([a-zA-Z]+)\s*([\d,\.]+)\s*x', reversed_name, re.IGNORECASE)
     if match:
-        return match.group(1)[::-1], match.group(2)[::-1]
+        return match.group(1)[::-1], match.group(2)[::-1].replace(',', '.')
     return None, None
 
-# Function to extract specific sections from 'Açıklama' until the next keyword occurs
-def extract_sections(text, keywords):
-    if pd.isna(text):
-        return {keyword: None for keyword in keywords}
-    sections = {keyword: None for keyword in keywords}
-    pattern = re.compile(r'(' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\s*(?:\:)?\s*(.*?)(?=' + '|'.join(r'\s*' + re.escape(keyword) + r'\s*(?:\:)?' for keyword in keywords) + r'|$)', re.DOTALL)
-    matches = pattern.findall(text)
-    for match in matches:
-        keyword, content = match
-        sections[keyword.strip()] = content.strip()
+# Function to process JSON content and extract sections
+def process_json_content(json_content, section_names):
+    # Initialize all sections with default value
+    sections = {name: "-" for name in section_names}
+    
+    for item in json_content:
+        tab_name = item.get("Tab Name", "").strip().lower()
+        content = item.get("Content", "-")
+        
+        # Normalize section names for matching
+        normalized_section_names = [name.strip().lower() for name in section_names]
+        
+        if tab_name in normalized_section_names:
+            matched_section = section_names[normalized_section_names.index(tab_name)]
+            sections[matched_section] = content
+    
     return sections
 
-# Fill NaN values with empty strings in the 'Açıklama' column
-df['Açıklama'] = df['Açıklama'].fillna('')
-
 # Apply the functions to the 'Ürün Adı' column to create 'Adet', 'Birim', and 'Miktar'
-df['Adet'] = df['Ürün Adı'].apply(extract_adet)
+df['Adet'] = df['Ürün Adı'].apply(lambda x: extract_adet(x) if extract_adet(x) is not None else '1')
 df['Birim'], df['Miktar'] = zip(*df['Ürün Adı'].apply(extract_birim_miktar))
 
-# Check if 'Açıklama' column exists
-if 'Açıklama' in df.columns:
-    # Extract specific sections from 'Açıklama'
-    keywords = ["Saklama Koşulları", "İçindekiler", "Besin Değerleri", "Alerjen Uyarısı", "Kullanım Önerisi"]
-    sections_df = df['Açıklama'].apply(lambda x: extract_sections(x, keywords))
+# Function to validate JSON
+def is_valid_json(string):
+    try:
+        json.loads(string)
+        return True
+    except json.JSONDecodeError:
+        return False
+
+# Process JSON content in 'Açıklama'
+if 'Açıklamalar' in df.columns:
+    keywords = ["Saklama Koşulları", "İçindekiler", "Besin Değerleri", "Alerjen Uyarısı", "Kullanım Önerisi", "Ürün Bilgileri", "İade Koşulları"]
+    
+    def safe_process_json_content(x):
+        if x and is_valid_json(x):
+            return process_json_content(json.loads(x), keywords)
+        return {name: "-" for name in keywords}
+    
+    # Apply processing with debugging
+    sections_df = df['Açıklamalar'].apply(safe_process_json_content)
     sections_df = pd.DataFrame(sections_df.tolist(), index=df.index)
     
-    # Merge the sections DataFrame with the original DataFrame
+    # Merge results
     df = pd.concat([df, sections_df], axis=1)
+    df.drop(columns=['Açıklamalar'], inplace=True)
+    df.drop(columns=['Açıklama'], inplace=True)
 else:
-    print("Column 'Açıklama' not found in the input file.")
+    print("Column 'Açıklamalar' not found or empty.")
 
 # Reorder columns to place 'Adet', 'Birim', and 'Miktar' next to 'Ürün Adı'
 columns = list(df.columns)

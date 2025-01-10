@@ -1,14 +1,15 @@
 {
     "name": "migros",
     "selectors": {
-        "image": "//img[contains(@class, 'ng-star-inserted')]",
+        "image": "//div[contains(@class, 'swiper-slide swiper-slide-visible swiper-slide-active ng-star-inserted')]//img",
         "product_name": "//h3[@class='text-color-black']",
         "next_page": "//button[@id='pagination-button-next']",
         "brand": "//a[@id='product-detail-brand-name']",
-        "current_price": "//div[@class='name-price-wrapper']//div[@class='sale-price mat-caption-bold']",
+        "current_price": "//div[@class='name-price-wrapper']//div[@class='sale-price']",
         "current_price_fallback": "//div[@class='name-price-wrapper']//div[@class='price subtitle-1 ng-star-inserted']",
         "old_price": "//div[@class='name-price-wrapper']//span[@class='single-price-amount']",
-        "description": "//mat-tab-body"
+        "description_tabs": "//div[@class='mat-mdc-tab-list']//div[@role='tab']",
+        "description": "//div[@id='product-tabs-order']//mat-tab-body[@role='tabpanel']"
     },
     "grid_class": "mdc-layout-grid__cell--span-2-desktop.mdc-layout-grid__cell--span-4-tablet.mdc-layout-grid__cell--span-2-phone.ng-star-inserted",
     "output_file": "migros"

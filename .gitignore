@@ -7,3 +7,4 @@ chromedriver
 category.xml
 category_scraper.py
 categories.json
+.DS_Store

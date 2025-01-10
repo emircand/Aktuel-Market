@@ -76,73 +76,79 @@ class WebScraper:
             
             product_name_element = self.driver.find_element(By.XPATH, self.config.selectors['product_name'])
             product_name = product_name_element.text
-
+    
             brand_name_element = self.driver.find_element(By.XPATH, self.config.selectors['brand'])
             brand_name = brand_name_element.text
-            
+    
             # Extract current price with fallback
             try:
                 current_price_element = self.driver.find_element(By.XPATH, self.config.selectors['current_price'])
             except NoSuchElementException:
                 current_price_element = self.driver.find_element(By.XPATH, self.config.selectors['current_price_fallback'])
             current_price = current_price_element.text.strip()
-
+    
             try:
                 old_price_element = self.driver.find_element(By.XPATH, self.config.selectors['old_price'])
                 old_price = old_price_element.text.strip()
             except NoSuchElementException:
                 old_price = "-"
             
+            # If old_price is null, assign current_price to old_price and set current_price to "-"
+            if not old_price or old_price == "-":
+                old_price = current_price
+                current_price = "-"
+    
+            # Initialize the product information dictionary
             product_info = {
                 'Market': self.config.name,
                 'Resim': image_url,
                 'Ürün Adı': product_name,
                 'Marka': brand_name,
-                'Son Fiyat': current_price,
-                'Eski Fiyat': old_price,
+                'İndirimli Fiyat': current_price,
+                'Fiyat': old_price,
                 'Kategori': category_name,
                 'Kaynak': self.driver.current_url,
                 'Tarih': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
             }
-
-            # Add optional fields if configured
-            for field, selector in self.config.selectors.items():
-                if field not in ['image', 'product_name', 'current_price', 'current_price_fallback']:
-                    try:
-                        element = self.driver.find_element(By.XPATH, selector)
-                        if field == 'product_code':
-                            value = element.text.split(': ')[1] if ': ' in element.text else element.text
-                        else:
-                            value = element.text.strip()
-                        if self.config.name == 'migros':
-                            product_info['Ürün Kodu'] = "-"
-                        else:
-                            product_info['Ürün Kodu'] = value
-                    except NoSuchElementException:
-                        product_info['Ürün Kodu'] = "-"
-
-            # # Extract old price if available
-            # if 'old_price' in self.config.selectors:
-            #     try:
-            #         old_price_element = self.driver.find_element(By.XPATH, self.config.selectors['old_price'])
-            #         old_price = old_price_element.text.strip()
-            #         product_info['Eski Fiyat'] = old_price
-            #     except NoSuchElementException:
-            #         product_info['Eski Fiyat'] = "-"
-
-            # Extract description if available
-            if 'description' in self.config.selectors:
+    
+            # Handle multiple sections for description
+            if 'description_tabs' in self.config.selectors:
                 try:
-                    description_element = self.driver.find_element(By.XPATH, self.config.selectors['description'])
-                    description = description_element.text.strip()
-                    product_info['Açıklama'] = description
+                    tab_elements = self.driver.find_elements(By.XPATH, self.config.selectors['description_tabs'])
+                    all_descriptions = []
+    
+                    for tab_index, tab in enumerate(tab_elements):
+                        try:
+                            # Use JavaScript to click the tab
+                            self.driver.execute_script("arguments[0].scrollIntoView(true);", tab)
+                            self.driver.execute_script("arguments[0].click();", tab)
+                            WebDriverWait(self.driver, 10).until(
+                                EC.presence_of_element_located((By.XPATH, self.config.selectors['description']))
+                            )
+                            time.sleep(1)  # Wait for the tab content to load
+    
+                            # Extract content from the active tab
+                            description_elements = self.driver.find_elements(By.XPATH, self.config.selectors['description'])
+                            tab_content = [element.text.strip() for element in description_elements if element.text.strip()]
+                            tab_name = tab.text.strip() if tab.text.strip() else "-"
+                            all_descriptions.append({
+                                'Tab Index': tab_index,
+                                'Tab Name': tab_name,
+                                'Content': " ".join(tab_content)
+                            })
+                        except Exception as e:
+                            print(f"Error clicking tab {tab_index}: {e}")
+    
+                    # Convert the descriptions to a JSON string to avoid issues
+                    product_info['Açıklamalar'] = json.dumps(all_descriptions, ensure_ascii=False)
                 except NoSuchElementException:
-                    product_info['Açıklama'] = "-"
-
+                    product_info['Açıklamalar'] = "[]"
+    
+            # Append the product info to the elements_info list
             self.elements_info.append(product_info)
-            
+    
         except Exception as e:
-            print(f"Element not found: {e}")
+            print(f"Error extracting product information: {e}")
 
     def scroll_page(self) -> None:
         scroll_pause_time = 2
@@ -183,7 +189,7 @@ class WebScraper:
         if 'urls' not in category_data or self.config.name not in category_data['urls']:
             print(f"Store '{self.config.name}' not found for category '{category_name}'.")
             return
-
+    
         base_url = category_data['urls'][self.config.name]
         self.latest_url = base_url
         current_page = 1
@@ -247,7 +253,7 @@ class WebScraper:
                         except Exception as e:
                             print(f"Error processing {href}: {e}")
                             continue
-
+    
                     # Check for next page and continue scraping
                     if not self.go_to_next_page(base_url, current_page):
                         break
